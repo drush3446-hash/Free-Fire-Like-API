@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template_string
 import asyncio
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
@@ -14,6 +14,67 @@ from google.protobuf.message import DecodeError
 import base64
 
 app = Flask(__name__)
+
+WEB_UI_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Free Fire Like Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; }
+        .container { max-width: 560px; margin: 64px auto; padding: 24px; background: #111827; border-radius: 14px; }
+        h1 { margin-top: 0; font-size: 1.5rem; }
+        p { color: #94a3b8; }
+        label { display: block; margin-top: 12px; margin-bottom: 6px; }
+        input { width: 100%; padding: 10px; border: 1px solid #334155; border-radius: 10px; background: #0b1220; color: #e2e8f0; }
+        button { margin-top: 16px; width: 100%; padding: 12px; background: #2563eb; color: #fff; border: 0; border-radius: 10px; cursor: pointer; }
+        button:hover { background: #1d4ed8; }
+        #result { margin-top: 16px; white-space: pre-wrap; background: #0b1220; padding: 12px; border-radius: 10px; min-height: 48px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Free Fire Like API Web Panel</h1>
+        <p>UID dalo, optional server choose karo, aur direct result pao.</p>
+        <label for="uid">UID</label>
+        <input id="uid" type="text" placeholder="e.g. 123456789" />
+        <label for="server_name">Server (optional)</label>
+        <input id="server_name" type="text" placeholder="e.g. IND, BD, BR" />
+        <button onclick="submitLike()">Send Like</button>
+        <div id="result">Result yahan dikhega...</div>
+    </div>
+
+    <script>
+        async function submitLike() {
+            const uid = document.getElementById('uid').value.trim();
+            const server = document.getElementById('server_name').value.trim();
+            const resultBox = document.getElementById('result');
+
+            if (!uid) {
+                resultBox.textContent = 'UID required hai.';
+                return;
+            }
+
+            try {
+                let url = `/like?uid=${encodeURIComponent(uid)}`;
+                if (server) {
+                    url += `&server_name=${encodeURIComponent(server)}`;
+                }
+
+                resultBox.textContent = 'Processing...';
+                const res = await fetch(url);
+                const data = await res.json();
+                resultBox.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resultBox.textContent = `Request failed: ${err}`;
+            }
+        }
+    </script>
+</body>
+</html>
+"""
 
 def load_tokens():
     try:
@@ -157,6 +218,11 @@ def decode_protobuf(binary):
 
 @app.route('/', methods=['GET'])
 def index():
+    return render_template_string(WEB_UI_TEMPLATE)
+
+
+@app.route('/health', methods=['GET'])
+def health():
     return jsonify({
         "credit": "https://t.me/paglu_dev",
         "message": "Welcome to the Free Fire Like API",

@@ -35,6 +35,11 @@ Click below to deploy directly to **Vercel**:
 
 After deploying to Vercel (or running locally), you can hit your API via simple HTTP requests:
 
+**Web Panel**
+- Open `/` in browser.
+- Enter `uid` and optional `server_name`.
+- Click **Send Like** and get JSON result on page.
+
 **GET** `/like`
 
 **Query Parameters:**
@@ -44,6 +49,11 @@ After deploying to Vercel (or running locally), you can hit your API via simple 
 ### Example Request:
 ```bash
 https://your-domain.com/like?uid=123456789
+```
+
+### Health Endpoint:
+```bash
+https://your-domain.com/health
 ```
 
 ### Example Response:
